@@ -29,7 +29,6 @@ function startExpressServer() {
         memory: process.memoryUsage().heapUsed / 1024 / 1024,
         ping: client.ws ? client.ws.ping : 0,
         lavalink: isLavalinkConnected
- 
       });
     });
 
@@ -47,6 +46,7 @@ const intents = [
   GatewayIntentBits.GuildVoiceStates,
   GatewayIntentBits.GuildMessages
 ];
+
 if (config.enablePrefix) {
   intents.push(GatewayIntentBits.MessageContent);
 }
@@ -54,6 +54,7 @@ if (config.enablePrefix) {
 const client = new Client({ intents });
 
 let isLavalinkConnected = false;
+
 const riffy = new Riffy(client, config.lavalink.nodes, {
   send: (payload) => {
     const guild = client.guilds.cache.get(payload.d.guild_id);
@@ -93,6 +94,7 @@ Object.defineProperty = function(obj, prop, descriptor) {
 };
 
 const queue247 = new Set();
+
 client.on('ready', async () => {
   console.log(`${config.emojis.success} Logged in as ${client.user.tag}`);
 
@@ -141,20 +143,24 @@ client.on('ready', async () => {
 });
 
 client.on('raw', (d) => riffy.updateVoiceState(d));
+
 riffy.on('nodeConnect', (node) => {
   console.log(`${config.emojis.success} Node ${node.name} connected`);
   isLavalinkConnected = true;
 });
+
 riffy.on('nodeError', (node, error) => {
   console.error(`${config.emojis.error} Node ${node.name} error:`, error);
   isLavalinkConnected = false;
 });
+
 riffy.on('nodeDisconnect', (node) => {
   console.log(`${config.emojis.error} Node ${node.name} disconnected`);
   isLavalinkConnected = false;
 });
 
 const nowPlayingMessages = new Map();
+
 function formatTime(ms) {
   const seconds = Math.floor((ms / 1000) % 60);
   const minutes = Math.floor((ms / (1000 * 60)) % 60);
@@ -235,12 +241,7 @@ function createNowPlayingContainer(player, track, disabled = false) {
             .setCustomId('queue')
             .setEmoji(config.emojis.queue)
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(disabled)
-        )
-    )
-    .addActionRowComponents(
-      new ActionRowBuilder()
-        .addComponents(
+            .setDisabled(disabled),
           new ButtonBuilder()
             .setCustomId('loop')
             .setEmoji(config.emojis.loop)
@@ -285,7 +286,6 @@ async function deleteOldNowPlaying(player) {
 
 function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info, trackInfo = null, customThumbnail = null) {
   let thumbnail = customThumbnail;
-
   if (!thumbnail && trackInfo) {
     thumbnail = trackInfo.artworkUrl || trackInfo.thumbnail || null;
     if (!thumbnail && trackInfo.uri && trackInfo.uri.includes('youtube.com')) {

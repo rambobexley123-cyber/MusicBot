@@ -6,7 +6,7 @@ module.exports = {
   supportServer: "https://discord.gg/9MVAPpfs8D",
 
   activity: {
-    name: "Kulukki Sarbath • Beta Music",
+    name: "Kulukki Sarbath • Dev RaMBO",
     type: "PLAYING" // PLAYING, LISTENING, WATCHING, STREAMING, COMPETING
   },
 

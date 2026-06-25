@@ -283,7 +283,25 @@ async function deleteOldNowPlaying(player) {
   }
 }
 
-function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info) {
+function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info, trackInfo = null) {
+  let thumbnail = null;
+
+  if (trackInfo) {
+    thumbnail = trackInfo.artworkUrl || trackInfo.thumbnail || null;
+    if (!thumbnail && trackInfo.uri && trackInfo.uri.includes('youtube.com')) {
+      const videoId = trackInfo.uri.split('v=')[1]?.split('&')[0];
+      if (videoId) thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    if (!thumbnail && trackInfo.uri && trackInfo.uri.includes('youtu.be')) {
+      const videoId = trackInfo.uri.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+  }
+
+  if (!thumbnail) {
+    thumbnail = 'https://i.imgur.com/QYJfXQv.png';
+  }
+
   return new ContainerBuilder()
     .addSectionComponents(
       new SectionBuilder()
@@ -293,7 +311,7 @@ function createSimpleContainerNoButtons(title, description, emoji = config.emoji
         )
         .setThumbnailAccessory(
           new ThumbnailBuilder()
-            .setURL(client.user.displayAvatarURL({ size: 1024 }))
+            .setURL(thumbnail)
             .setDescription(title)
         )
     )
@@ -568,7 +586,8 @@ client.on('interactionCreate', async (interaction) => {
         const container = createSimpleContainerNoButtons(
           'Playlist Added',
           `Added playlist **${resolve.playlistInfo.name}** (${resolve.tracks.length} tracks)`,
-          config.emojis.success
+          config.emojis.success,
+          resolve.tracks[0]?.info
         );
         await interaction.editReply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
       } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
@@ -579,7 +598,8 @@ client.on('interactionCreate', async (interaction) => {
         const container = createSimpleContainerNoButtons(
           'Added to Queue',
           `[${track.info.title}](${track.info.uri})`,
-          config.emojis.success
+          config.emojis.success,
+          track.info
         );
         await interaction.editReply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
       } else {
@@ -920,7 +940,8 @@ if (config.enablePrefix) {
           const container = createSimpleContainerNoButtons(
             'Playlist Added',
             `Added playlist **${resolve.playlistInfo.name}** (${resolve.tracks.length} tracks)`,
-            config.emojis.success
+            config.emojis.success,
+            resolve.tracks[0]?.info
           );
           await message.reply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
         } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
@@ -930,7 +951,8 @@ if (config.enablePrefix) {
           const container = createSimpleContainerNoButtons(
             'Added to Queue',
             `[${track.info.title}](${track.info.uri})`,
-            config.emojis.success
+            config.emojis.success,
+            track.info
           );
           await message.reply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
         } else {

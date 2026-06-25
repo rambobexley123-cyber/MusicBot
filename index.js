@@ -283,10 +283,10 @@ async function deleteOldNowPlaying(player) {
   }
 }
 
-function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info, trackInfo = null) {
-  let thumbnail = null;
+function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info, trackInfo = null, customThumbnail = null) {
+  let thumbnail = customThumbnail;
 
-  if (trackInfo) {
+  if (!thumbnail && trackInfo) {
     thumbnail = trackInfo.artworkUrl || trackInfo.thumbnail || null;
     if (!thumbnail && trackInfo.uri && trackInfo.uri.includes('youtube.com')) {
       const videoId = trackInfo.uri.split('v=')[1]?.split('&')[0];
@@ -444,19 +444,21 @@ riffy.on('trackEnd', async (player) => {
 
 riffy.on('queueEnd', async (player) => {
   const channel = client.channels.cache.get(player.textChannel);
+  const guild = client.guilds.cache.get(player.guildId);
+  const serverIcon = guild ? guild.iconURL({ size: 1024 }) : null;
 
   await deleteOldNowPlaying(player);
 
   if (queue247.has(player.guildId)) {
     if (channel) {
-      const container = createSimpleContainerNoButtons('24/7 Mode', 'Queue ended but staying in 24/7 mode', config.emojis.info);
+      const container = createSimpleContainerNoButtons('24/7 Mode', 'Queue ended but staying in 24/7 mode', config.emojis.info, null, serverIcon);
       await channel.send({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
     }
     return;
   }
 
   if (channel) {
-    const container = createSimpleContainerNoButtons('Queue Ended', 'Queue ended, leaving voice channel', config.emojis.success);
+    const container = createSimpleContainerNoButtons('Queue Ended', 'Queue ended, leaving voice channel', config.emojis.success, null, serverIcon);
     await channel.send({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
   }
 

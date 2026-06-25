@@ -65,7 +65,6 @@ const riffy = new Riffy(client, config.lavalink.nodes, {
 });
 
 // Fix Riffy Node initialization error by overriding the broken defineProperty call
-// This is a workaround for the riffy package bug mentioned in the error
 const { Node } = require('riffy/build/structures/Node');
 const originalDefineProperty = Object.defineProperty;
 Object.defineProperty = function(obj, prop, descriptor) {
@@ -80,7 +79,6 @@ Object.defineProperty = function(obj, prop, descriptor) {
     try {
         return originalDefineProperty(obj, prop, descriptor);
     } catch (e) {
-        // If it fails with the specific error, try a fallback
         if (e instanceof TypeError && e.message.includes('Invalid property descriptor')) {
             return originalDefineProperty(obj, prop, {
                 value: descriptor.value,
@@ -235,11 +233,6 @@ function createNowPlayingContainer(player, track, disabled = false) {
           new ButtonBuilder()
             .setCustomId('shuffle')
             .setEmoji(config.emojis.shuffle)
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(disabled),
-          new ButtonBuilder()
-            .setCustomId('queue')
-            .setEmoji(config.emojis.queue)
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(disabled),
           new ButtonBuilder()
@@ -406,7 +399,7 @@ function createHelpContainer() {
     .addSeparatorComponents(
       new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
     )
-    .addActionRowComponents(
+    .addcomponents(
       new ActionRowBuilder()
         .addComponents(
           new ButtonBuilder()
@@ -425,7 +418,6 @@ riffy.on('trackStart', async (player, track) => {
   const channel = client.channels.cache.get(player.textChannel);
   if (!channel) return;
 
-  // Clear previous message before sending a new one
   await deleteOldNowPlaying(player);
 
   const container = createNowPlayingContainer(player, track);
@@ -538,12 +530,6 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         await interaction.reply({ content: `${config.emojis.loop} Loop set to: ${loopLabel}`, ephemeral: true });
-        break;
-      }
-
-      case 'queue': {
-        const queueContainer = createQueueContainer(player, interaction.guild, interaction.user);
-        await interaction.reply({ components: [queueContainer], flags: MessageFlags.IsComponentsV2, ephemeral: true });
         break;
       }
     }

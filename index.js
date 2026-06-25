@@ -231,8 +231,8 @@ function createNowPlayingContainer(player, track, disabled = false) {
             .setStyle(ButtonStyle.Danger)
             .setDisabled(disabled),
           new ButtonBuilder()
-            .setCustomId('shuffle')
-            .setEmoji(config.emojis.shuffle)
+            .setCustomId('queue')
+            .setEmoji(config.emojis.queue)
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(disabled),
           new ButtonBuilder()
@@ -399,7 +399,7 @@ function createHelpContainer() {
     .addSeparatorComponents(
       new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
     )
-    .addcomponents(
+    .addActionRowComponents(
       new ActionRowBuilder()
         .addComponents(
           new ButtonBuilder()
@@ -507,12 +507,12 @@ client.on('interactionCreate', async (interaction) => {
         break;
       }
 
-      case 'shuffle': {
-        if (player.queue.length === 0) {
+      case 'queue': {
+        if (player.queue.length === 0 && !player.current) {
           return interaction.reply({ content: `${config.emojis.error} Queue is empty`, ephemeral: true });
         }
-        player.queue.shuffle();
-        await interaction.reply({ content: `${config.emojis.shuffle} Shuffled queue`, ephemeral: true });
+        const queueContainer = createQueueContainer(player, interaction.guild, interaction.user);
+        await interaction.reply({ components: [queueContainer], flags: MessageFlags.IsComponentsV2, ephemeral: true });
         break;
       }
 

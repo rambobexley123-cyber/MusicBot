@@ -6,8 +6,8 @@ module.exports = {
   supportServer: "https://discord.gg/9MVAPpfs8D",
 
   activity: {
-    name: "/help",
-    type: "LISTENING" // PLAYING, LISTENING, WATCHING, STREAMING, COMPETING
+    name: "Kulukki Sarbath • Beta Music",
+    type: "PLAYING" // PLAYING, LISTENING, WATCHING, STREAMING, COMPETING
   },
 
   express: {

@@ -1,3 +1,4 @@
+// index.js
 const { Client, GatewayIntentBits, ActivityType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const { Riffy } = require('riffy');
 const config = require('./config.js');
@@ -8,6 +9,7 @@ require('dotenv').config();
 function startExpressServer() {
   if (config.express.enabled) {
     const app = express();
+
     app.get('/', (req, res) => {
       res.json({
         status: 'online',
@@ -27,6 +29,7 @@ function startExpressServer() {
         memory: process.memoryUsage().heapUsed / 1024 / 1024,
         ping: client.ws ? client.ws.ping : 0,
         lavalink: isLavalinkConnected
+ 
       });
     });
 
@@ -190,13 +193,20 @@ function createNowPlayingContainer(player, track, disabled = false) {
       new SectionBuilder()
         .addTextDisplayComponents(
           new TextDisplayBuilder()
-            .setContent(`## ${config.emojis.music} Now Playing\n**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**\n\n**Duration:** \`${formatTime(info.length || 0)}\` • **Requested By:** <@${track.info.requester}>`)
+            .setContent(`## ${config.emojis.music} Now Playing\n**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**`)
         )
         .setThumbnailAccessory(
           new ThumbnailBuilder()
             .setURL(thumbnail)
             .setDescription(info.title || 'Song Thumbnail')
         )
+    )
+    .addTextDisplayComponents(
+      new TextDisplayBuilder()
+        .setContent(`**Duration:** ${formatTime(info.length || 0)} • **Requested By:** <@${track.info.requester}>`)
+    )
+    .addSeparatorComponents(
+      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
     )
     .addActionRowComponents(
       new ActionRowBuilder()
@@ -275,6 +285,7 @@ async function deleteOldNowPlaying(player) {
 
 function createSimpleContainerNoButtons(title, description, emoji = config.emojis.info, trackInfo = null, customThumbnail = null) {
   let thumbnail = customThumbnail;
+
   if (!thumbnail && trackInfo) {
     thumbnail = trackInfo.artworkUrl || trackInfo.thumbnail || null;
     if (!thumbnail && trackInfo.uri && trackInfo.uri.includes('youtube.com')) {
@@ -846,7 +857,6 @@ client.on('interactionCreate', async (interaction) => {
       .addSeparatorComponents(
         new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
       )
-      .addCampComponents ||
       .addActionRowComponents(
         new ActionRowBuilder()
           .addComponents(
